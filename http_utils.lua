@@ -74,7 +74,6 @@ function http_utils.parse_content_disposition(header_value)
     -- -- typ --> "attachment"
     -- -- parms --> { ['filename']='foo.html', ['foo']='bar' }
 
-
     local filename_param = lpeg.P("filename") + lpeg.P("filename*")
                            + (lpeg.P("FILENAME") / "filename")
                            + (lpeg.P("FILENAME*") / "filename")
@@ -102,6 +101,13 @@ end
 
 
 function http_utils.get_boundary_from_content_type_header(header_value)
+    -- parse a content type header (only the value part) and returns the
+    -- boundary parameter
+    --
+    -- E.g.:
+    -- local boundary = 'Content-Type: multipart/mixed; boundary=gc0p4Jq0M2Y'
+    -- -- boundary --> "gc0p4Jq0M2Y"
+
     local media_type = token * lpeg.P('/') * token
     local value = quoted_string + lpeg.C(token)
     local param = lpeg.Cs(token) * lwsp^0 * lpeg.P("=") * lwsp^0 * value
@@ -121,6 +127,8 @@ end
 
 
 function http_utils.form_multipart_body(parts, boundary)
+    -- forms a valid multipart form/data body with the given boundary and parts
+
     local body = {}
     local crlf = '\r\n'
     local dcrlf = crlf..crlf
