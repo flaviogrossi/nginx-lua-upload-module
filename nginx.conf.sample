@@ -1,0 +1,44 @@
+user  nginx;
+worker_processes  1;
+
+error_log  /var/log/nginx/error.log;
+
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    keepalive_timeout  65;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location ~ ^/backend_upload/.+$ {
+            proxy_pass        http://localhost:8000;
+            allow 127.0.0.1;
+            deny all;
+        }
+        location ~ ^/upload/(?P<handler>.+)$ {
+            # lua_code_cache off;   # decomment only when debugging lua code
+            set $backend_url /backend_upload/$handler;
+            set $package_path '/usr/share/nginx/?.lua';
+            client_max_body_size       2000M;
+            content_by_lua_file '/usr/share/nginx/nginx_lua_upload.lua';
+        }
+
+}
