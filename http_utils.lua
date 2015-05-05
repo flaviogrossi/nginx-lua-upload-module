@@ -127,7 +127,7 @@ end
 
 
 function http_utils.form_multipart_body(parts, boundary)
-    -- forms a valid multipart form/data body with the given boundary and parts
+    -- forms a valid multipart/form-data body with the given boundary and parts
 
     local body = {}
     local crlf = '\r\n'
