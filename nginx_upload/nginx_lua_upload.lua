@@ -5,12 +5,17 @@ end
 local posix = require "posix"
 local upload = require "resty.upload"
 local http_utils = require "nginx_upload.http_utils"
+local string_utils = require "nginx_upload.string_utils"
 
 local chunk_size = 4096
 local form = upload:new(chunk_size)
 local parts = {}
 local backend_url = ngx.var.backend_url
 local response
+local upload_cleanup = ngx.var.upload_cleanup
+if not upload_cleanup then
+    upload_cleanup = ''
+end
 
 
 if (backend_url == nil or backend_url == "") then
@@ -18,7 +23,7 @@ if (backend_url == nil or backend_url == "") then
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
 
-ngx.log(ngx.DEBUG, "backend_url is %", backend_url, "%")
+ngx.log(ngx.DEBUG, "backend_url is \"", backend_url, "\"")
 
 local boundary = http_utils.get_boundary_from_content_type_header(
                                         ngx.req.get_headers()["Content-Type"])
@@ -127,10 +132,21 @@ end
 
 
 -- proxy request to backend_url and return response
+local cleanup_codes = string_utils.enumerate_from_string_range(upload_cleanup)
 local body = http_utils.form_multipart_body(parts, boundary)
+
 local response = ngx.location.capture(backend_url,
                                       { method=ngx.HTTP_POST, body=body })
 ngx.status = response.status
+if cleanup_codes[response.status] then
+    -- remove temporary uploaded files
+    for _, part in pairs(parts) do
+        if part['filepath'] then
+            os.remove(part['filepath'])
+        end
+    end
+end
+
 for k, v in pairs(response.header) do
     ngx.header[k] = v
 end
