@@ -33,4 +33,11 @@ function M.split(s, sSeparator, nMax, bRegexp)
 end
 
 
+function M.strip(s)
+    -- strip leading and trailing whitespaces from s
+    -- code taken from http://lua-users.org/wiki/StringRecipes
+  return s:match "^%s*(.-)%s*$"
+end
+
+
 return M
