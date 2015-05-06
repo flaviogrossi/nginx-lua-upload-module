@@ -1,5 +1,5 @@
 local lunit = require("lunit")
-local http_utils = require("http_utils")
+local http_utils = require("nginx_upload.http_utils")
 
 module("p", lunit.testcase)
 
