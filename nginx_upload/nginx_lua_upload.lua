@@ -3,8 +3,8 @@ if ngx.var.package_path then
 end
 
 local posix = require "posix"
-local upload = require "upload"
-local http_utils = require "http_utils"
+local upload = require "resty.upload"
+local http_utils = require "nginx_upload.http_utils"
 
 local chunk_size = 4096
 local form = upload:new(chunk_size)
