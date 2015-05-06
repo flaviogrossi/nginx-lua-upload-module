@@ -1,7 +1,7 @@
 local lpeg = require("lpeg")
 
 
-local http_utils = {}
+local M = {}
 
 
 -- rfc 5987 sec. 3.2.1
@@ -64,7 +64,7 @@ local token = (lpeg.R("\032\126") - separators)^1
 local ext_token = token * lpeg.P("*")
 
 
-function http_utils.parse_content_disposition(header_value)
+function M.parse_content_disposition(header_value)
     -- parse a content disposition header (only the value part) and returns a
     -- tuple (disp_type, disp_params) where disp_type is the disposition type
     -- and disp_params is a table of the disposition params
@@ -100,7 +100,7 @@ function http_utils.parse_content_disposition(header_value)
 end
 
 
-function http_utils.get_boundary_from_content_type_header(header_value)
+function M.get_boundary_from_content_type_header(header_value)
     -- parse a content type header (only the value part) and returns the
     -- boundary parameter
     --
@@ -126,7 +126,7 @@ function http_utils.get_boundary_from_content_type_header(header_value)
 end
 
 
-function http_utils.form_multipart_body(parts, boundary)
+function M.form_multipart_body(parts, boundary)
     -- forms a valid multipart/form-data body with the given boundary and parts
 
     local body = {}
@@ -161,4 +161,4 @@ function http_utils.form_multipart_body(parts, boundary)
 end
 
 
-return http_utils
+return M
