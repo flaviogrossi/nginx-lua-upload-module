@@ -40,4 +40,37 @@ function M.strip(s)
 end
 
 
+function M.enumerate_from_string_range(s)
+    -- enumerate a sequence of numbers expressed as a list or range
+    -- e.g.: enumerate_from_string_range('10,20,30-32') will return
+    --   { ['10'] = true, ['20'] = true,
+    --     ['30']: true, ['31']: true, ['32']: true }
+    -- the format of the output table is chosen to easily test for membership:
+    --   if t['10] then ... end
+
+    local res = {}
+    local range
+    local start
+    local stop
+
+    for _, v in ipairs(M.split(s, ',')) do
+        range = M.split(v, '-')
+        if (#range == 1) then
+            if tonumber(range[1]) then
+                res[tonumber(range[1])] = true
+            end
+        elseif (#range == 2) then
+            start = tonumber(range[1])
+            stop = tonumber(range[2])
+            if start and stop and stop >= start then
+                for i=start,stop do
+                    res[i] = true
+                end
+            end
+        end
+    end
+    return res
+end
+
+
 return M
