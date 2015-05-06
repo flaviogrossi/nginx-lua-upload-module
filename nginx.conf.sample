@@ -36,6 +36,7 @@ http {
         location ~ ^/upload/(?P<handler>.+)$ {
             # lua_code_cache off;   # decomment only when debugging lua code
             set $backend_url /backend_upload/$handler;
+            set $upload_cleanup '404,500-505';
             set $package_path '/usr/share/nginx/?.lua';
             client_max_body_size       2000M;
             content_by_lua_file '/usr/share/nginx/nginx_lua_upload.lua';
