@@ -55,3 +55,23 @@ function test_split_with_empty_field()
         lunit.assert_equal(v, t[i])
     end
 end
+
+function test_basic_strip()
+    local s = string_utils.strip('  one two\t')
+    lunit.assert_equal('one two', s)
+end
+
+function test_strip_with_no_ws()
+    local s = string_utils.strip('one two')
+    lunit.assert_equal('one two', s)
+end
+
+function test_strip_with_no_ws()
+    local s = string_utils.strip('one two')
+    lunit.assert_equal('one two', s)
+end
+
+function test_strip_with_empty_input()
+    local s = string_utils.strip('')
+    lunit.assert_equal('', s)
+end
