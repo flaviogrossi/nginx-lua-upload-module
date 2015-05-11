@@ -134,7 +134,7 @@ function M.form_multipart_body(parts, boundary)
     local dcrlf = crlf..crlf
     for part_name, part in pairs(parts) do
         table.insert(body, '--'..boundary..crlf)
-        if part['value'] and part['value'] ~= '' then
+        if not part['filename'] then
             table.insert(body,
               'Content-Disposition: form-data; name="'..part_name..'"'..dcrlf)
             table.insert(body, part['value']..crlf)
