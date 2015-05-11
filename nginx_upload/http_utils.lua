@@ -140,20 +140,20 @@ function M.form_multipart_body(parts, boundary)
             table.insert(body, part['value']..crlf)
         else
             table.insert(body,
-                'Content-Disposition: form-data; name="name"'..dcrlf)
+                'Content-Disposition: form-data; name="'..part_name..'.name"'..dcrlf)
             table.insert(body, part['filename']..crlf)
             table.insert(body, '--'..boundary..crlf)
             table.insert(body,
-                'Content-Disposition: form-data; name="path"'..dcrlf)
-            table.insert(body, part['filepath']..crlf)
+                'Content-Disposition: form-data; name="'..part_name..'.path"'..dcrlf)
+            table.insert(body, part_name..'.'..part['filepath']..crlf)
             table.insert(body, '--'..boundary..crlf)
             table.insert(body,
-                'Content-Disposition: form-data; name="content-type"'..dcrlf)
-            table.insert(body, part['content_type']..crlf)
+                'Content-Disposition: form-data; name="'..part_name..'.content-type"'..dcrlf)
+            table.insert(body, part_name..'.'..part['content_type']..crlf)
             table.insert(body, '--'..boundary..crlf)
             table.insert(body,
-                'Content-Disposition: form-data; name="size"'..dcrlf)
-            table.insert(body, part['size']..crlf)
+                'Content-Disposition: form-data; name="'..part_name..'.size"'..dcrlf)
+            table.insert(body, part_name..'.'..part['size']..crlf)
         end
     end
     table.insert(body, '--'..boundary..'--'..crlf)
