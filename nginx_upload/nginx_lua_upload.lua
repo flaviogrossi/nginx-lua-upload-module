@@ -68,7 +68,7 @@ while true do
             if disp_type == "form-data" then
                 current_filename = disp_params['filename']
                 current_name = disp_params['name']
-                if current_filename then
+                if current_filename and current_filename ~= '' then
                     current_path = os.tmpname()
                     ngx.log(ngx.DEBUG, "Saving body to \"", current_path, "\"")
                     if current_path then
