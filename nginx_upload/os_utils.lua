@@ -3,10 +3,11 @@ local M = {}
 
 function M.joinpath(a, ...)
     -- just like python's os.path.join
+
     local path = {a}
     local concatenated_path
     local path_len
-    local args = table.pack(...)
+    local args = {n = select("#", ...), ...} -- like table.pack(...) in lua 5.2
     local cur_arg
     for i = 1,args.n do
         cur_arg = args[i]
