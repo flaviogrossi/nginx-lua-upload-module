@@ -6,11 +6,14 @@ local posix = require "posix"
 local upload = require "resty.upload"
 local http_utils = require "nginx_upload.http_utils"
 local string_utils = require "nginx_upload.string_utils"
+local os_utils = require "nginx_upload.os_utils"
 
 local chunk_size = 4096
 local form = upload:new(chunk_size)
 local parts = {}
 local backend_url = ngx.var.backend_url
+local upload_store = ngx.var.upload_store
+local tempfile_template
 local response
 local upload_cleanup = ngx.var.upload_cleanup
 if not upload_cleanup then
@@ -22,6 +25,13 @@ if (backend_url == nil or backend_url == "") then
     ngx.log(ngx.ERR, "No $backend_url set in nginx.conf. Failing request.")
     ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
+
+if (upload_store == nil or upload_store == "") then
+    upload_store = '/var/tmp/'
+end
+tempfile_template = os_utils.joinpath(upload_store,
+                                      'nginx_lua_upload_XXXXXX')
+print('tempfile_template: <'..tempfile_template..'>')
 
 ngx.log(ngx.DEBUG, "backend_url is \"", backend_url, "\"")
 
@@ -69,15 +79,11 @@ while true do
                 current_filename = disp_params['filename']
                 current_name = disp_params['name']
                 if current_filename and current_filename ~= '' then
-                    current_path = os.tmpname()
+                    file_descriptor, current_path = posix.mkstemp(tempfile_template)
                     ngx.log(ngx.DEBUG, "Saving body to \"", current_path, "\"")
-                    if current_path then
-                        file_descriptor = io.open(current_path, "w+")
-                        if not file_descriptor then
-                            ngx.say("failed to open file ", current_path)
-                            ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-                            return
-                        end
+                    if not (current_path and file_descriptor) then
+                        ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+                        return
                     end
                 end
             end
@@ -88,7 +94,7 @@ while true do
 
     elseif typ == "body" then
         if file_descriptor then
-            if not file_descriptor:write(res) then
+            if not posix.write(file_descriptor, res) then
                 ngx.log(ngx.ERR, "Failed to write to file")
                 ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
             end
@@ -100,8 +106,8 @@ while true do
         local part = {}
 
         if file_descriptor then
-            part['size'] = file_descriptor:seek("end")
-            file_descriptor:close()
+            part['size'] = posix.lseek(file_descriptor, 0, posix.SEEK_END)
+            posix.close(file_descriptor)
             posix.chmod(current_path, 'rw-rw----')
         end
         if not part['size'] then
@@ -142,6 +148,7 @@ if cleanup_codes[response.status] then
     -- remove temporary uploaded files
     for _, part in pairs(parts) do
         if part['filepath'] then
+            print('deleting', part['filepath'])
             os.remove(part['filepath'])
         end
     end
