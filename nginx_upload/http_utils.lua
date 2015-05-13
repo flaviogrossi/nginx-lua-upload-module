@@ -122,6 +122,9 @@ function M.get_boundary_from_content_type_header(header_value)
                  * params^0, accumulate_params)
 
     local media_type, params = lpeg.match(hval, header_value)
+    if not params then
+        return nil
+    end
     return params['boundary']
 end
 

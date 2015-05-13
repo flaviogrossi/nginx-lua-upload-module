@@ -31,16 +31,15 @@ if (upload_store == nil or upload_store == "") then
 end
 tempfile_template = os_utils.joinpath(upload_store,
                                       'nginx_lua_upload_XXXXXX')
-print('tempfile_template: <'..tempfile_template..'>')
 
 ngx.log(ngx.DEBUG, "backend_url is \"", backend_url, "\"")
 
 local boundary = http_utils.get_boundary_from_content_type_header(
-                                        ngx.req.get_headers()["Content-Type"])
+                                ngx.req.get_headers()["Content-Type"] or '')
 
 if not boundary then
     ngx.log(ngx.ERR, "No boundary from content-type header (\""
-            .. ngx.req.get_headers()["Content-Type"] .. "\")")
+            .. (ngx.req.get_headers()["Content-Type"] or '') .. "\")")
     ngx.exit(ngx.HTTP_BAD_REQUEST)
 end
 
