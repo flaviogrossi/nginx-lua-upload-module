@@ -152,7 +152,7 @@ if cleanup_codes[response.status] then
     for _, p in pairs(parts) do
         for _, part in pairs(p) do
             if part['filepath'] then
-                print('deleting', part['filepath'])
+                ngx.log(ngx.DEBUG, 'deleting file "', part['filepath'], '"')
                 os.remove(part['filepath'])
             end
         end
@@ -162,5 +162,11 @@ end
 for k, v in pairs(response.header) do
     ngx.header[k] = v
 end
-ngx.print(response.body)
-return ngx.OK
+
+if ngx.status == 200 then
+    ngx.print(response.body)
+    return ngx.OK
+else
+    ngx.log(ngx.ERR, 'returning status "', ngx.status, '"')
+    ngx.exit(ngx.status)
+end
