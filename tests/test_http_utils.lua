@@ -1,6 +1,8 @@
 local lunit = require("lunit")
 local http_utils = require("nginx_upload.http_utils")
 
+local table = table
+
 module("p", lunit.testcase)
 
 
@@ -270,4 +272,85 @@ function test_get_boundary_from_content_type_header_multiple_params()
     local header = 'multipart/form-data; foo=bar; boundary=gc0p4Jq0M2Yt08jU534c0p'
     local boundary = http_utils.get_boundary_from_content_type_header(header)
     lunit.assert_equal('gc0p4Jq0M2Yt08jU534c0p', boundary)
+end
+
+
+-- tests for form_multipart_body
+function test_form_multipart_body_with_value_only()
+    local boundary = 'test_boundary'
+    local part_one = {['value']='test'}
+    local parts = {['part_name'] = {part_one}}
+    local body = http_utils.form_multipart_body(parts, boundary)
+    local expected_body = table.concat({'--test_boundary\r\n',
+              'Content-Disposition: form-data; name="part_name"\r\n',
+              '\r\n',
+              'test\r\n',
+              '--test_boundary--\r\n'
+          })
+    lunit.assert_equal(expected_body, body)
+end
+
+
+function test_form_multipart_body_with_filename()
+    local boundary = 'test_boundary'
+    local part_two = {['filename']='fname',
+                      ['filename']='fname',
+                      ['content_type']='ctype',
+                      ['size']='1234',
+                      ['filepath']='fpath'}
+    local parts = {['part_name'] = {part_one}, ['file_part_name'] = {part_two}}
+    local body = http_utils.form_multipart_body(parts, boundary)
+    local expected_body = table.concat({'--test_boundary\r\n',
+              'Content-Disposition: form-data; name="file_part_name.name"\r\n',
+              '\r\n',
+              'fname\r\n',
+              '--test_boundary\r\n',
+              'Content-Disposition: form-data; name="file_part_name.path"\r\n',
+              '\r\n',
+              'fpath\r\n',
+              '--test_boundary\r\n',
+              'Content-Disposition: form-data; name="file_part_name.content-type"\r\n',
+              '\r\n',
+              'ctype\r\n',
+              '--test_boundary\r\n',
+              'Content-Disposition: form-data; name="file_part_name.size"\r\n',
+              '\r\n',
+              '1234\r\n',
+              '--test_boundary--\r\n'
+          })
+    lunit.assert_equal(expected_body, body)
+end
+
+
+function test_form_multipart_body_with_two_parts_with_same_name()
+    local boundary = 'test_boundary'
+    local part_one = {['value']='test'}
+    local part_two = {['value']='test2'}
+    local parts = {['part_name'] = {part_one, part_two}}
+    local body = http_utils.form_multipart_body(parts, boundary)
+
+    -- two different bodies to not rely on ordering
+    local expected_body1 = table.concat({'--test_boundary\r\n',
+              'Content-Disposition: form-data; name="part_name"\r\n',
+              '\r\n',
+              'test\r\n',
+              '--test_boundary\r\n',
+              'Content-Disposition: form-data; name="part_name"\r\n',
+              '\r\n',
+              'test2\r\n',
+              '--test_boundary--\r\n'
+          })
+    local expected_body2 = table.concat({'--test_boundary\r\n',
+              'Content-Disposition: form-data; name="part_name"\r\n',
+              '\r\n',
+              'test\r\n',
+              '--test_boundary\r\n',
+              'Content-Disposition: form-data; name="part_name"\r\n',
+              '\r\n',
+              'test2\r\n',
+              '--test_boundary--\r\n'
+          })
+    if body ~= expected_body1 and body ~= expected_body2 then
+        lunit.fail('Unexpected body: "'..body..'"')
+    end
 end
