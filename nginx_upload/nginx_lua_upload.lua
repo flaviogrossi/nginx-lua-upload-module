@@ -119,7 +119,11 @@ while true do
         part['filepath'] = current_path
         part['value'] = table.concat(value_buffer)
 
-        parts[current_name] = part
+        if parts[current_name] then
+            table.insert(parts[current_name], part)
+        else
+            parts[current_name] = {part}
+        end
 
         current_filename = nil
         current_content_type = nil
@@ -145,10 +149,12 @@ local response = ngx.location.capture(backend_url,
 ngx.status = response.status
 if cleanup_codes[response.status] then
     -- remove temporary uploaded files
-    for _, part in pairs(parts) do
-        if part['filepath'] then
-            print('deleting', part['filepath'])
-            os.remove(part['filepath'])
+    for _, p in pairs(parts) do
+        for _, part in pairs(p) do
+            if part['filepath'] then
+                print('deleting', part['filepath'])
+                os.remove(part['filepath'])
+            end
         end
     end
 end

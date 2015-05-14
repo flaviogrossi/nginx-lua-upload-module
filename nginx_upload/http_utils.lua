@@ -135,29 +135,31 @@ function M.form_multipart_body(parts, boundary)
     local body = {}
     local crlf = '\r\n'
     local dcrlf = crlf..crlf
-    for part_name, part in pairs(parts) do
-        if not part['filename'] then
-            table.insert(body, '--'..boundary..crlf)
-            table.insert(body,
-              'Content-Disposition: form-data; name="'..part_name..'"'..dcrlf)
-            table.insert(body, part['value']..crlf)
-        elseif part['filename'] ~= '' then
-            table.insert(body, '--'..boundary..crlf)
-            table.insert(body,
-                'Content-Disposition: form-data; name="'..part_name..'.name"'..dcrlf)
-            table.insert(body, part['filename']..crlf)
-            table.insert(body, '--'..boundary..crlf)
-            table.insert(body,
-                'Content-Disposition: form-data; name="'..part_name..'.path"'..dcrlf)
-            table.insert(body, part['filepath']..crlf)
-            table.insert(body, '--'..boundary..crlf)
-            table.insert(body,
-                'Content-Disposition: form-data; name="'..part_name..'.content-type"'..dcrlf)
-            table.insert(body, part['content_type']..crlf)
-            table.insert(body, '--'..boundary..crlf)
-            table.insert(body,
-                'Content-Disposition: form-data; name="'..part_name..'.size"'..dcrlf)
-            table.insert(body, part['size']..crlf)
+    for part_name, p in pairs(parts) do
+        for _, part in pairs(p) do
+            if not part['filename'] then
+                table.insert(body, '--'..boundary..crlf)
+                table.insert(body,
+                  'Content-Disposition: form-data; name="'..part_name..'"'..dcrlf)
+                table.insert(body, part['value']..crlf)
+            elseif part['filename'] ~= '' then
+                table.insert(body, '--'..boundary..crlf)
+                table.insert(body,
+                    'Content-Disposition: form-data; name="'..part_name..'.name"'..dcrlf)
+                table.insert(body, part['filename']..crlf)
+                table.insert(body, '--'..boundary..crlf)
+                table.insert(body,
+                    'Content-Disposition: form-data; name="'..part_name..'.path"'..dcrlf)
+                table.insert(body, part['filepath']..crlf)
+                table.insert(body, '--'..boundary..crlf)
+                table.insert(body,
+                    'Content-Disposition: form-data; name="'..part_name..'.content-type"'..dcrlf)
+                table.insert(body, part['content_type']..crlf)
+                table.insert(body, '--'..boundary..crlf)
+                table.insert(body,
+                    'Content-Disposition: form-data; name="'..part_name..'.size"'..dcrlf)
+                table.insert(body, part['size']..crlf)
+            end
         end
     end
     table.insert(body, '--'..boundary..'--'..crlf)
