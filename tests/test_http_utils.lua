@@ -219,6 +219,14 @@ function test_attachment_new_and_filename_encoded()
                        disp_params['filename'])
 end
 
+function test_filename_with_parenthesis()
+    local header = 'form-data; name="argname"; filename="p(1).txt"'
+    disp_type, disp_params = http_utils.parse_content_disposition(header)
+    lunit.assert_equal('form-data', disp_type)
+    lunit.assert_equal('argname', disp_params['name'])
+    lunit.assert_equal('p(1).txt', disp_params['filename'])
+end
+
 -- this is not implemented
 -- function test_attachment_with_iso_filename_2231iso()
     -- local header = 'attachment; filename*=iso-8859-1\'\'foo-%E4.html'
