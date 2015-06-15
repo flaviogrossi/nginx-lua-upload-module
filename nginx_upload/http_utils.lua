@@ -32,15 +32,12 @@ local ext_value = mime_charset * lwsp^0 * lpeg.S("'")
 
 -- rfc rfc2616 sec. 2.2
 -- TEXT           = <any OCTET except CTLs, but including LWS>
--- ctext          = <any TEXT excluding "(" and ")">
 -- CTL            = <any US-ASCII control character (octets 0 - 31)
 --                   and DEL (127)>
 local ctl = lpeg.R("\000\031")
 
 -- TEXT           = <any OCTET except CTLs, but including LWS>
 local text = lpeg.P(1) - (ctl - lpeg.S("\t"))
--- ctext          = <any TEXT excluding "(" and ")">
-local ctext = text - lpeg.R("()")
 
 -- quoted-string  = ( <"> *(qdtext | quoted-pair ) <"> )
 -- qdtext         = <any TEXT except <">>
