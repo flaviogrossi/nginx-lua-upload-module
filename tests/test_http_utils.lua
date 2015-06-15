@@ -211,7 +211,7 @@ function test_attachment_new_and_filename()
     lunit.assert_equal('x', disp_params['foobar'])
 end
 
-function test_attachment_new_and_filename()
+function test_attachment_new_and_filename_encoded()
     local header = 'attachment; filename="=?ISO-8859-1?Q?foo-=E4.html?="'
     disp_type, disp_params = http_utils.parse_content_disposition(header)
     lunit.assert_equal('attachment', disp_type)
