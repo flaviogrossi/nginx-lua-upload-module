@@ -163,7 +163,8 @@ for k, v in pairs(response.header) do
     ngx.header[k] = v
 end
 
-if ngx.status == 200 then
+if math.floor(ngx.status / 100) == 2 then
+    -- 2xx status code
     ngx.print(response.body)
     return ngx.OK
 else
