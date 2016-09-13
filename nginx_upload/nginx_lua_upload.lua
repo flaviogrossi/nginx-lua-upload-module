@@ -81,6 +81,7 @@ while true do
                     file_descriptor, current_path = posix.mkstemp(tempfile_template)
                     ngx.log(ngx.DEBUG, "Saving body to \"", current_path, "\"")
                     if not (current_path and file_descriptor) then
+                        ngx.log(ngx.ERR, "Cannot create file: ", tempfile_template)
                         ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
                         return
                     end
